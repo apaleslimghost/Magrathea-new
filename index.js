@@ -6,8 +6,11 @@ const remap = require('@quarterto/remap');
 
 const {triangulate} = require('delaunay-fast');
 
+const w = window.innerWidth;
+const h = window.innerHeight;
+
 const scene = new τ.Scene();
-const camera = new τ.OrthographicCamera(-500, 500, 500, -500, 1, 1000);
+const camera = new τ.OrthographicCamera(-w/2, w/2, h/2, -h/2, 0, 1000);
 
 scene.add(camera);
 
@@ -19,7 +22,7 @@ document.body.style.margin = 0;
 
 const grid = hexGrid({rows: 50, cols: 50 * Math.sqrt(3) / 2, size: 20});
 const tris = triangulate(grid);
-const heights = grid.map(Math.random);
+const heights = grid.map(() => 4 * Math.random());
 
 // let viewport = [[0, 500], [0, 500]];
 //
