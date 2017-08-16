@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "budo index.js --live --t babelify"
+    "start": "budo index.js --live -t babelify -t glslify"
   },
   "keywords": [],
   "author": "",
@@ -14,7 +14,9 @@
     "@quarterto/perturbed-hex-grid": "^1.3.0",
     "@quarterto/remap": "^1.0.0",
     "@quarterto/retina-canvas": "^1.2.0",
-    "delaunay-fast": "^1.0.1"
+    "delaunay-fast": "^1.0.1",
+    "glslify": "^6.1.0",
+    "three-js": "^79.0.0"
   },
   "devDependencies": {
     "babel-preset-env": "^1.6.0",
