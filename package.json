@@ -1,0 +1,24 @@
+{
+  "name": "Magrathea-new",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "budo index.js --live --t babelify"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@quarterto/perturbed-hex-grid": "^1.3.0",
+    "delaunay-fast": "^1.0.1"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.6.0",
+    "babelify": "^7.3.0",
+    "budo": "^10.0.4"
+  },
+  "babel": {
+    "presets": [["env", {"targets": {"browsers": ["last 2 versions"]}}]]
+  }
+}
