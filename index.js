@@ -13,7 +13,6 @@ const w = window.innerWidth;
 const h = window.innerHeight;
 
 const scene = new τ.Scene();
-// const camera = new τ.OrthographicCamera(-w/2, w/2, w/2, -w/2, 0, 1000);
 const camera = new τ.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 10000 );
 camera.position.z = 500;
 camera.position.y = 500;
@@ -27,9 +26,9 @@ renderer.setPixelRatio(window.devicePixelRatio);
 document.body.appendChild(renderer.domElement);
 document.body.style.margin = 0;
 
-const grid = hexGrid({rows: 50, cols: 50 * Math.sqrt(3) / 2, size: 20});
+const grid = hexGrid({rows: 500, cols: 500 * Math.sqrt(3) / 2, size: 10});
 const tris = triangulate(grid);
-const heights = grid.map(() => Math.pow(3 * Math.random(), 2));
+const heights = grid.map(() => Math.pow(5 * Math.random(), 2));
 
 const terrainGeom = new τ.Geometry();
 
