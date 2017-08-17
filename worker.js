@@ -6,19 +6,41 @@ module.exports = self => {
 	self.addEventListener('message', ev => {
 		const {rows, cols} = ev.data;
 
-		const grid = new Float32Array(new ArrayBuffer(4 * 2 * rows * cols));
-		const gridArray = hexGrid({rows, cols, size: 10});
-		gridArray.forEach(([x, y], i) => {
-			grid[i * 2] = x;
-			grid[i * 2 + 1] = y;
+		self.postMessage({type: 'start'});
+
+		const gridArray = hexGrid({
+			rows,
+			cols,
+			size: 10,
+			map(v) {
+				const vertex = new Float32Array(new ArrayBuffer(8));
+				vertex.set(v);
+				self.postMessage({
+					type: 'vertex',
+					vertex
+				}, [vertex.buffer]);
+				return v;
+			}
 		});
 
-		const tris = new Uint32Array(new ArrayBuffer(8 * 6 * rows * cols));
-		tris.set(triangulate(gridArray));
+		console.time('triangulate');
+		const tris = triangulate(gridArray);
+		console.timeEnd('triangulate');
 
-		const heights = new Float32Array(new ArrayBuffer(4 * rows * cols));
-		heights.set(gridArray.map(() => Math.pow(2 * Math.random(), 2)));
+		for(let i = 0, l = tris.length; i < l; i += 3) {
+			const face = new Float32Array(new ArrayBuffer(12));
+			face.set([
+				tris[i],
+				tris[i + 1],
+				tris[i + 2],
+			]);
 
-		self.postMessage({grid, tris, heights}, [grid.buffer, tris.buffer, heights.buffer]);
+			self.postMessage({
+				type: 'face',
+				face
+			}, [face.buffer]);
+		}
+
+		self.postMessage({type: 'end'});
 	});
 };
