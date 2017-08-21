@@ -2,7 +2,6 @@ const THREE = require('three');
 const OrbitControls = require('three-orbitcontrols');
 const Loop = require('@quarterto/animation-loop');
 const work = require('webworkify');
-const {default: MaterialModifier} = require('three-material-modifier');
 
 const w = window.innerWidth;
 const h = window.innerHeight;
@@ -56,46 +55,21 @@ const uniforms = {
 	bumpScale: { value: 500 },
 };
 
-const uniformDefs = `
-uniform sampler2D bumpTexture;
-uniform float bumpScale;
-`;
-
-const deformTerrain = `
-vec4 bumpData = texture2D( bumpTexture, uv );
-
-// move the position along the normal
-vec3 newPosition = position + normal * bumpScale * bumpData.r;
-
-gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
-`;
-
-const TerrainMaterial = MaterialModifier.extend(THREE.MeshPhongMaterial, {
-	uniforms,
-
-	vertexShader: {
-		uniforms: uniformDefs,
-		postTransform: deformTerrain,
-	},
+const material = new THREE.MeshPhongMaterial({
+	color: 0x00FF00,
+	displacementMap: bumpTexture,
+	displacementScale: 200,
 });
-
-const material = new TerrainMaterial({color: 0x00FF00});
 
 const terrainGeom = new THREE.PlaneBufferGeometry( 1000, 1000, 100, 100 );
 const terrain = new THREE.Mesh(terrainGeom, material);
 
 terrain.rotation.x = -Math.PI/2;
 terrain.castShadow = terrain.receiveShadow = true;
-terrain.customDepthMaterial = new THREE.ShaderMaterial({
-	vertexShader: `
-		${uniformDefs}
-
-		void main() {
-			${deformTerrain}
-		}
-	`,
-	fragmentShader: THREE.ShaderLib.shadow.fragmentShader,
-	uniforms,
+terrain.customDepthMaterial = new THREE.MeshDepthMaterial({
+	depthPacking: THREE.RGBADepthPacking,
+	displacementMap: bumpTexture,
+	displacementScale: 200,
 });
 
 scene.add(terrain);

@@ -15,9 +15,7 @@
     "@quarterto/remap": "^1.0.0",
     "@quarterto/retina-canvas": "^1.2.0",
     "delaunay-fast": "^1.0.1",
-    "glslify": "^6.1.0",
-    "three": "^0.87.1",
-    "three-material-modifier": "0.0.3"
+    "three": "^0.87.1"
   },
   "devDependencies": {
     "babel-preset-env": "^1.6.0",
