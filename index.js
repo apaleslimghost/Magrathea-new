@@ -22,22 +22,33 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 document.body.style.margin = 0;
 
-const directionalLight = new THREE.DirectionalLight( 0xFFFFFF );
-directionalLight.position.x = -1000;
-directionalLight.position.y = 500;
+const sun = new THREE.DirectionalLight( 0xFFFFcc );
+sun.position.x = 1000;
+sun.position.y = 0;
 
-directionalLight.castShadow = true;
+const moon = new THREE.DirectionalLight( 0x99ccff, 0.5 );
+moon.position.x = -1000;
+moon.position.y = 0;
 
-directionalLight.shadow.camera.near = 1;
-directionalLight.shadow.camera.far = 5000;
-directionalLight.shadow.camera.right = 1000;
-directionalLight.shadow.camera.left = -1000;
-directionalLight.shadow.camera.top	= 1000;
-directionalLight.shadow.camera.bottom = -1000;
+const setupLight = light => {
+	light.castShadow = true;
 
-scene.add(directionalLight);
+	light.shadow.camera.near = 1;
+	light.shadow.camera.far = 5000;
+	light.shadow.camera.right = 1000;
+	light.shadow.camera.left = -1000;
+	light.shadow.camera.top	= 1000;
+	light.shadow.camera.bottom = -1000;
 
-const ambientLight = new THREE.AmbientLight( 0x1122aa, 2 );
+	light.shadow.mapSize.width = 2048;
+	light.shadow.mapSize.height = 2048;
+
+	scene.add(light);
+};
+
+[sun, moon].forEach(setupLight);
+
+const ambientLight = new THREE.AmbientLight( 0x0000ff, 0.1 );
 scene.add(ambientLight);
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -53,11 +64,12 @@ const uniforms = {
 };
 
 const material = new THREE.MeshPhongMaterial({
-	color: 0x00FF00,
+	color: 0x31943C,
 	displacementMap: bumpTexture,
 	displacementScale: 200,
 	bumpMap: bumpTexture,
 	bumpScale: 100,
+	specular: 0.1,
 });
 
 const terrainGeom = new THREE.PlaneGeometry( 1000, 1000, 100, 100 );
@@ -126,7 +138,15 @@ scene.add(terrain);
 // generateTerrain.postMessage({rows: 250, cols: 250});
 
 const loop = new Loop;
-loop.on('tick', () => {
+loop.on('tick', t => {
+	sun.position.x = 1000 * Math.cos(t / 2000);
+	sun.position.z = -1600 * Math.sin(t / 2000);
+	sun.position.y = -1000 * Math.sin(t / 2000);
+
+	moon.position.x = 1000 * Math.cos(t / 2000 + Math.PI);
+	moon.position.z = -1600 * Math.sin(t / 2000 + Math.PI);
+	moon.position.y = -1000 * Math.sin(t / 2000 + Math.PI);
+
 	renderer.render(scene, camera);
 	controls.update();
 });
