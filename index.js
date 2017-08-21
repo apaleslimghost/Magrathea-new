@@ -1,7 +1,7 @@
 const THREE = require('three');
 const OrbitControls = require('three-orbitcontrols');
 const Loop = require('@quarterto/animation-loop');
-const work = require('webworkify');
+const Water = require('./water');
 
 const w = window.innerWidth;
 const h = window.innerHeight;
@@ -22,7 +22,7 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 document.body.style.margin = 0;
 
-const sun = new THREE.DirectionalLight( 0xFFFFcc );
+const sun = new THREE.DirectionalLight( 0xFFFFff );
 sun.position.x = 1000;
 sun.position.y = 0;
 
@@ -48,9 +48,6 @@ const setupLight = light => {
 
 [sun, moon].forEach(setupLight);
 
-const ambientLight = new THREE.AmbientLight( 0x0000ff, 0.1 );
-scene.add(ambientLight);
-
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enablePan = false;
 controls.mouseButtons = { ORBIT: THREE.MOUSE.RIGHT, ZOOM: THREE.MOUSE.MIDDLE };
@@ -63,17 +60,17 @@ const uniforms = {
 	bumpScale: { value: 500 },
 };
 
-const material = new THREE.MeshPhongMaterial({
+const terrainMaterial = new THREE.MeshPhongMaterial({
 	color: 0x31943C,
 	displacementMap: bumpTexture,
 	displacementScale: 200,
 	bumpMap: bumpTexture,
 	bumpScale: 100,
-	specular: 0.1,
+	shininess: 0.1,
 });
 
-const terrainGeom = new THREE.PlaneGeometry( 1000, 1000, 100, 100 );
-const terrain = new THREE.Mesh(terrainGeom, material);
+const terrainGeom = new THREE.PlaneBufferGeometry( 1000, 1000, 100, 100 );
+const terrain = new THREE.Mesh(terrainGeom, terrainMaterial);
 
 terrain.rotation.x = -Math.PI/2;
 terrain.castShadow = terrain.receiveShadow = true;
@@ -85,57 +82,30 @@ terrain.customDepthMaterial = new THREE.MeshDepthMaterial({
 
 scene.add(terrain);
 
-//TODO just a regular triangular mesh
+const waterNormals = new THREE.ImageUtils.loadTexture('images/waternormals.jpg');
+waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
 
-// let terrain, terrainGeom;
-// const generateTerrain = work(require('./worker'));
-//
-// generateTerrain.addEventListener('message', ev => {
-// 	switch(ev.data.type) {
-// 		case 'start': {
-// 			if(terrain) {
-// 				scene.remove(terrain);
-// 			}
-//
-// 			terrainGeom = new THREE.Geometry();
-// 			break;
-// 		};
-//
-// 		case 'vertex': {
-// 			const {vertex} = ev.data;
-// 			terrainGeom.vertices.push(
-// 				new THREE.Vector3(vertex[0], 0, vertex[1])
-// 			);
-// 			break;
-// 		};
-//
-// 		case 'face': {
-// 			const {face} = ev.data;
-// 			terrainGeom.faces.push(
-// 				new THREE.Face3(face[0], face[1], face[2])
-// 			);
-// 			break;
-// 		};
-//
-// 		case 'end': {
-// 			terrainGeom.computeFaceNormals();
-// 			terrainGeom.computeVertexNormals();
-//
-// 			terrain = new THREE.Mesh( terrainGeom, material );
-// 			scene.add(terrain);
-//
-// 			const box = new THREE.Box3().setFromObject(terrain);
-// 			const {x: terrainWidth, z: terrainHeight} = box.size();
-//
-// 			terrain.position.x = -terrainWidth/2;
-// 			terrain.position.z = -terrainHeight/2;
-// 			terrain.position.y = 0;
-// 			break;
-// 		};
-// 	}
-// });
-//
-// generateTerrain.postMessage({rows: 250, cols: 250});
+const water = new Water(renderer, camera, scene, {
+	textureWidth: 256,
+	textureHeight: 256,
+	waterNormals,
+	alpha: 0.9,
+	sunDirection: sun.position.normalize(),
+	sunColor: sun.color,
+	waterColor: 0x001e2f,
+	betaVersion: 0,
+	side: THREE.DoubleSide,
+	distortionScale: 10000,
+});
+
+const seaGeom = new THREE.PlaneBufferGeometry( 1000, 1000 );
+const sea = new THREE.Mesh(terrainGeom, water.material);
+sea.rotation.x = Math.PI/2;
+sea.position.y = 60;
+sea.receiveShadow = true;
+
+sea.add(water);
+scene.add(sea);
 
 const loop = new Loop;
 loop.on('tick', t => {
@@ -146,6 +116,10 @@ loop.on('tick', t => {
 	moon.position.x = 1000 * Math.cos(t / 2000 + Math.PI);
 	moon.position.z = -1600 * Math.sin(t / 2000 + Math.PI);
 	moon.position.y = -1000 * Math.sin(t / 2000 + Math.PI);
+
+	water.material.uniforms.sunDirection.value = sun.position.normalize();
+	water.material.uniforms.time.value = t / 1000;
+	water.render();
 
 	renderer.render(scene, camera);
 	controls.update();

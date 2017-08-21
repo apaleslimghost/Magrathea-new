@@ -24,8 +24,7 @@
     "brfs": "^1.4.3",
     "budo": "^10.0.4",
     "textrequireify": "^2.1.1",
-    "three-orbitcontrols": "^1.2.1",
-    "webworkify": "^1.4.0"
+    "three-orbitcontrols": "^1.2.1"
   },
   "babel": {
     "presets": [
