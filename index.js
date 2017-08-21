@@ -22,23 +22,20 @@ renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 document.body.style.margin = 0;
 
-const directionalLight = new THREE.DirectionalLight( 0xffff00 );
+const directionalLight = new THREE.DirectionalLight( 0xFFFFFF );
 directionalLight.position.x = -1000;
-directionalLight.position.y = 300;
+directionalLight.position.y = 500;
 
 directionalLight.castShadow = true;
+
 directionalLight.shadow.camera.near = 1;
 directionalLight.shadow.camera.far = 5000;
 directionalLight.shadow.camera.right = 1000;
 directionalLight.shadow.camera.left = -1000;
 directionalLight.shadow.camera.top	= 1000;
 directionalLight.shadow.camera.bottom = -1000;
-directionalLight.shadow.mapSize.width = 1024;
-directionalLight.shadow.mapSize.height = 1024;
-scene.add(directionalLight);
 
-scene.add( new THREE.DirectionalLightHelper( directionalLight, 10 ) );
-scene.add( new THREE.CameraHelper( directionalLight.shadow.camera ) );
+scene.add(directionalLight);
 
 const ambientLight = new THREE.AmbientLight( 0x1122aa, 2 );
 scene.add(ambientLight);
@@ -59,9 +56,11 @@ const material = new THREE.MeshPhongMaterial({
 	color: 0x00FF00,
 	displacementMap: bumpTexture,
 	displacementScale: 200,
+	bumpMap: bumpTexture,
+	bumpScale: 100,
 });
 
-const terrainGeom = new THREE.PlaneBufferGeometry( 1000, 1000, 100, 100 );
+const terrainGeom = new THREE.PlaneGeometry( 1000, 1000, 100, 100 );
 const terrain = new THREE.Mesh(terrainGeom, material);
 
 terrain.rotation.x = -Math.PI/2;
