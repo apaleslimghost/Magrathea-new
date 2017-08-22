@@ -74,8 +74,10 @@ const draw = ev => {
 			ev.clientX * 2,
 			ev.clientY * 2
 		);
-		ctx.stroke();
-		bumpTexture.needsUpdate = true;
+		requestAnimationFrame(() => {
+			ctx.stroke();
+			bumpTexture.needsUpdate = true;
+		});
 	}
 };
 
@@ -109,13 +111,13 @@ const bumpTexture = new THREE.CanvasTexture(canvas);
 const terrainMaterial = new THREE.MeshPhongMaterial({
 	color: 0x31943C,
 	displacementMap: bumpTexture,
-	displacementScale: 200,
+	displacementScale: 50,
 	bumpMap: bumpTexture,
-	bumpScale: 100,
+	bumpScale: 25,
 	shininess: 0.1,
 });
 
-const terrainGeom = new THREE.PlaneBufferGeometry( 1000, 1000, 100, 100 );
+const terrainGeom = new THREE.PlaneBufferGeometry( 1000, 1000, 200, 200 );
 const terrain = new THREE.Mesh(terrainGeom, terrainMaterial);
 
 terrain.rotation.x = -Math.PI/2;
@@ -123,7 +125,7 @@ terrain.castShadow = terrain.receiveShadow = true;
 terrain.customDepthMaterial = new THREE.MeshDepthMaterial({
 	depthPacking: THREE.RGBADepthPacking,
 	displacementMap: bumpTexture,
-	displacementScale: 200,
+	displacementScale: 50,
 });
 
 scene.add(terrain);
@@ -147,7 +149,7 @@ const water = new Water(renderer, camera, scene, {
 const seaGeom = new THREE.PlaneBufferGeometry( 1000, 1000 );
 const sea = new THREE.Mesh(terrainGeom, water.material);
 sea.rotation.x = Math.PI/2;
-sea.position.y = 60;
+sea.position.y = 15;
 sea.receiveShadow = true;
 
 sea.add(water);
