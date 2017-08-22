@@ -52,13 +52,63 @@ const controls = new OrbitControls(camera, renderer.domElement);
 controls.enablePan = false;
 controls.mouseButtons = { ORBIT: THREE.MOUSE.RIGHT, ZOOM: THREE.MOUSE.MIDDLE };
 
-const bumpTexture = new THREE.ImageUtils.loadTexture( 'images/heightmap.png' );
-bumpTexture.wrapS = bumpTexture.wrapT = THREE.RepeatWrapping;
+const canvas = document.createElement('canvas');
+canvas.width = canvas.height = 2048;
+Object.assign(canvas.style, {
+	width: '128px',
+	height: '128px',
+	position: 'absolute',
+	top: 0,
+	left: 0,
+	border: '1px dashed grey',
+});
 
-const uniforms = {
-	bumpTexture: { value: bumpTexture },
-	bumpScale: { value: 500 },
+const ctx = canvas.getContext('2d');
+
+let drawing = false, drawX, drawY;
+
+const gradient = ctx.createRadialGradient(32, 32, 32, 32, 32, 0);
+gradient.addColorStop(0, 'black');
+gradient.addColorStop(1, 'white');
+
+const draw = ev => {
+	if(drawing) {
+		ctx.lineTo(
+			ev.clientX * 16 - 32,
+			ev.clientY * 16 - 32
+		);
+		ctx.stroke();
+		bumpTexture.needsUpdate = true;
+	}
 };
+
+canvas.addEventListener('mousedown', ev => {
+	ctx.strokeStyle = 'white';
+	ctx.lineWidth = 64;
+	ctx.beginPath();
+	ctx.moveTo(
+		ev.clientX * 16 - 32,
+		ev.clientY * 16 - 32
+	);
+	drawing = true;
+
+	draw(ev);
+});
+
+canvas.addEventListener('mousemove', draw);
+
+canvas.addEventListener('mouseup', ev => {
+	draw(ev);
+	drawing = false;
+});
+
+ctx.fillStyle = 'black';
+ctx.fillRect(0, 0, 2048, 2048);
+
+document.body.appendChild(canvas);
+
+const bumpTexture = new THREE.CanvasTexture(canvas);
+// bumpTexture.wrapS = bumpTexture.wrapT = THREE.RepeatWrapping;
 
 const terrainMaterial = new THREE.MeshPhongMaterial({
 	color: 0x31943C,
